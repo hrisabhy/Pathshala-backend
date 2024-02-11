@@ -9,6 +9,7 @@ const {
   createToken,
   comparePassword,
 } = require("../services/authService");
+const { default: mongoose } = require("mongoose");
 
 module.exports.register = async (req, res) => {
   const errors = validationResult(req);
@@ -67,7 +68,11 @@ module.exports.login = async (req, res) => {
       }
 
       // Generate JWT token
-      const token = createToken({ id: user._id, name: user.name });
+      const token = createToken({
+        id: user._id,
+        name: user.name,
+        role: user.role,
+      });
       if (user.role === "auditor") {
         return res.json({ token, auditor: true });
       }
@@ -107,5 +112,55 @@ module.exports.profile = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports.promoteAuditor = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    user.role = "auditor";
+    await user.save();
+    const token = createToken({
+      id: user.id,
+      name: user.name,
+      role: user.role,
+    });
+    return res.json({
+      message: "User promoted to auditor successfully",
+      token,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+module.exports.loginAuditor = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ message: "Invalid username or password" });
+    }
+    const token = createToken({
+      id: user.id,
+      name: user.name,
+      role: user.role,
+    });
+    res.json({ message: "Auditor logged in successfully", token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
