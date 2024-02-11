@@ -8,7 +8,6 @@ module.exports.isAuditor = async (req, res, next) => {
     await verifyToken(req, res, next);
 
     // Check if user has "auditor" role
-    console.log(req.user.role);
     if (req.user.role !== roles.AUDITOR) {
       return res
         .status(403)
@@ -17,5 +16,6 @@ module.exports.isAuditor = async (req, res, next) => {
     next();
   } catch (error) {
     console.log(error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };

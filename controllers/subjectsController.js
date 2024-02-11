@@ -80,10 +80,8 @@ module.exports.getAllSubjects = async (req, res) => {
 
 module.exports.test = async (req, res) => {
   try {
-    const subjectes = await SubjectCategory.find({});
-    return res.status(200).json({ subjectes });
+    console.log("req object reached test method");
   } catch (error) {
     console.log(error.message);
-    return res.status(500).json("Server internal error!");
   }
 };
