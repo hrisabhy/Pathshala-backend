@@ -6,9 +6,6 @@ const noteSchema = new Schema({
     type: String,
     required: true,
   },
-  description: {
-    type: String,
-  },
   pdf: {
     type: String,
     required: true, // Store path or cloud storage URL
