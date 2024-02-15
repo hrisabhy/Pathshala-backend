@@ -29,7 +29,6 @@ module.exports.uploadNote = async (req, res) => {
         }
         fs.unlinkSync(uploadedFile);
         const cat_res = await SubjectCategory.findOne({ name: category_name });
-        console.log(cat_res);
         const newNote = new Note({
           title,
           category: cat_res._id,
